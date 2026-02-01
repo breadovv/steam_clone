@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация - SteamLite</title>
+    <style>
+        body { font-family: sans-serif; background: #1b2838; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: #171a21; padding: 30px; border-radius: 5px; width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: none; background: #32353c; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #5c7e10; border: none; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background: #6da012; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Создать аккаунт</h2>
+        <form id="registerForm">
+            <input type="text" id="username" placeholder="Имя пользователя" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p style="text-align:center; font-size: 0.8rem; margin-top: 15px;">
+            <a href="login.html" style="color: #66c0f4; text-decoration: none;">Уже есть аккаунт? Войти</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('Регистрация успешна! Теперь войдите.');
+                window.location.href = 'login.html';
+            } else {
+                alert(data.message);
+            }
+        });
+    </script>
+</body>
+</html>
