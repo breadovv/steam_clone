@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить игру - SteamLite</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <a href="/">← Назад</a>
+    <span style="flex-grow: 1; text-align: center; font-weight: bold;">
+        ДОБАВИТЬ ИГРУ
+    </span>
+</nav>
+
+<div class="form-container">
+    <h2>Новая игра</h2>
+
+    <form id="addGameForm" enctype="multipart/form-data">
+        <div class="form-hint">Название игры</div>
+        <input type="text" name="title" required>
+
+        <div class="form-hint">Описание</div>
+        <textarea name="description" required></textarea>
+
+        <div class="form-hint">Цена ($)</div>
+        <input type="number" name="price" step="0.01" required>
+
+        <div class="form-hint">Жанры (через запятую)</div>
+        <input type="text" name="genres">
+
+        <div class="form-hint">Теги (через запятую)</div>
+        <input type="text" name="tags">
+
+        <div class="form-hint">Разработчик</div>
+        <input type="text" name="developer">
+
+        <div class="form-hint">Издатель</div>
+        <input type="text" name="publisher">
+
+        <div class="form-hint">Обложка игры</div>
+        <input type="file" name="image" accept="image/*" required>
+
+        <button type="submit">Добавить игру</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("addGameForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    try {
+        const res = await fetch("/api/games", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Ошибка при добавлении игры");
+            return;
+        }
+
+        alert("Игра успешно добавлена!");
+        window.location.href = "/games.html";
+
+    } catch (err) {
+        alert("Ошибка сервера");
+        console.error(err);
+    }
+});
+</script>
+
+</body>
+</html>

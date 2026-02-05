@@ -1,16 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-<h1>Game Details</h1>
+<nav>
+    <a href="../index.html">Главная</a>
+    <a href="games.html">Все игры</a>
+    <a href="login.html" id="loginLink">Войти</a>
+</nav>
 
-<div id="gameContainer"></div>
+<div class="hero">
+    <h1>Game Details</h1>
+</div>
 
-<button onclick="addToLibrary()">Add to Library</button>
+<div id="gameContainer" style="text-align: center; padding: 20px;"></div>
+
+<div style="text-align: center; margin-top: 20px;">
+  <button class="btn" onclick="addToLibrary()">Add to Library</button>
+</div>
 
 <script src="../js/api.js"></script>
 <script src="../js/library.js"></script>

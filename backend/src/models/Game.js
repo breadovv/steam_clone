@@ -8,9 +8,8 @@ const GameSchema = new mongoose.Schema({
   tags: [String],
   developer: String,
   publisher: String,
+  image: String, 
   createdAt: { type: Date, default: Date.now }
 });
-
-GameSchema.index({ title: "text", tags: 1 });
 
 module.exports = mongoose.model("Game", GameSchema);

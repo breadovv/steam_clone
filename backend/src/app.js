@@ -12,6 +12,10 @@ app.use(express.static(path.join(__dirname, "../../frontend")));
 app.use("/api/games", require("./routes/game.routes"));
 app.use("/api/reviews", require("./routes/review.routes"));
 app.use("/api/users", require("./routes/user.routes"));
+app.use("/api/uploads", require("./routes/upload.routes"));
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../../frontend/index.html"));
