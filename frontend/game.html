@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<h1>Game Details</h1>
+
+<div id="gameContainer"></div>
+
+<button onclick="addToLibrary()">Add to Library</button>
+
+<script src="../js/api.js"></script>
+<script src="../js/library.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const gameId = params.get("id");
+
+async function loadGame() {
+  const res = await fetch(`${API_URL}/games/${gameId}`);
+  const game = await res.json();
+
+  document.getElementById("gameContainer").innerHTML = `
+    <h2>${game.title}</h2>
+    <p>Price: $${game.price}</p>
+    <p>${game.description}</p>
+  `;
+}
+
+async function addToLibrary() {
+  await fetch(`${API_URL}/library/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    },
+    body: JSON.stringify({ gameId })
+  });
+
+  alert("Added to library");
+}
+
+loadGame();
+</script>
+
+</body>
+</html>
