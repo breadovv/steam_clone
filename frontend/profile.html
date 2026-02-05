@@ -1,3 +1,84 @@
-<h1>My Library</h1>
-<div id="library"></div>
-<script type="module" src="../js/library.js"></script>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Моя библиотека - SteamLite</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav>
+  <a href="/">Главная</a>
+  <a href="games.html">Все игры</a>
+  <a href="login.html" id="loginLink">Войти</a>
+</nav>
+
+<div class="hero">
+  <h1>Моя библиотека</h1>
+</div>
+
+<div class="container" id="userInfo">
+  <p>Загрузка информации о пользователе...</p>
+</div>
+
+<div class="container" id="library">
+  <p>Загрузка игр...</p>
+</div>
+
+<script type="module">
+const API_URL = "http://localhost:3000"; // замени на свой API
+
+// Получение информации о текущем пользователе
+async function loadUser() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Пожалуйста, войдите в аккаунт");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/users/me`, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const user = await res.json();
+
+    // Показываем инфо о пользователе
+    document.getElementById("userInfo").innerHTML = `
+      <h2>${user.username}</h2>
+      <p>Email: ${user.email}</p>
+      <p>Роль: ${user.role}</p>
+      <p>Дата регистрации: ${new Date(user.createdAt).toLocaleDateString()}</p>
+    `;
+
+    // Загружаем библиотеку
+    const libraryContainer = document.getElementById("library");
+    if (!user.library || user.library.length === 0) {
+      libraryContainer.innerHTML = "<p>Ваша библиотека пуста</p>";
+      return;
+    }
+
+    libraryContainer.innerHTML = "";
+    user.library.forEach(item => {
+      const date = new Date(item.purchaseDate).toLocaleDateString();
+      libraryContainer.innerHTML += `
+        <div class="game-card">
+          <h3>${item.gameId.title}</h3>
+          <p>Цена: $${item.gameId.price}</p>
+          <p>Дата покупки: ${date}</p>
+          <p>Часы игры: ${item.hoursPlayed}</p>
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Ошибка при загрузке данных пользователя:", err);
+  }
+}
+
+loadUser();
+</script>
+
+</body>
+</html>
