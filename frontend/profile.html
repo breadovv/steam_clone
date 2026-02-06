@@ -5,35 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Моя библиотека - SteamLite</title>
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Дополнительные стили для профиля */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .user-sidebar {
+      background: #171a21;
+      padding: 20px;
+      border-radius: 4px;
+      height: fit-content;
+    }
+    .logout-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      background: #a44c3d;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 2px;
+      cursor: pointer;
+      border: none;
+    }
+    .logout-btn:hover { background: #ce5e4d; }
+    
+    .library-section h2 { color: #66c0f4; margin-top: 0; }
+  </style>
 </head>
 <body>
 
 <nav>
   <a href="/">Главная</a>
+  <div class="nav-title">SteamLite</div>
   <a href="games.html">Все игры</a>
-  <a href="login.html" id="loginLink">Войти</a>
 </nav>
 
-<div class="hero">
-  <h1>Моя библиотека</h1>
-</div>
+<div class="profile-grid">
+  <aside class="user-sidebar" id="userInfo">
+    <p>Загрузка данных...</p>
+  </aside>
 
-<div class="container" id="userInfo">
-  <p>Загрузка информации о пользователе...</p>
-</div>
-
-<div class="container" id="library">
-  <p>Загрузка игр...</p>
+  <main class="library-section">
+    <h2>Мои игры</h2>
+    <div id="library">
+      <p>Загрузка библиотеки...</p>
+    </div>
+  </main>
 </div>
 
 <script type="module">
-const API_URL = "http://localhost:3000"; // замени на свой API
+const API_URL = "http://localhost:3000/api"; // Проверь, чтобы путь был /api
 
-// Получение информации о текущем пользователе
-async function loadUser() {
+async function loadProfile() {
   const token = localStorage.getItem("token");
   if (!token) {
-    alert("Пожалуйста, войдите в аккаунт");
+    alert("Войдите в систему!");
     window.location.href = "login.html";
     return;
   }
@@ -42,42 +75,57 @@ async function loadUser() {
     const res = await fetch(`${API_URL}/users/me`, {
       headers: { "Authorization": "Bearer " + token }
     });
-    const user = await res.json();
 
-    // Показываем инфо о пользователе
+    if (!res.ok) throw new Error("Не удалось получить данные");
+
+    const responseData = await res.json();
+    
+    // ПРОВЕРКА СТРУКТУРЫ: Если сервер оборачивает данные в объект .user или .data
+    const user = responseData.user || responseData.data || responseData;
+    
+    console.log("Данные пользователя:", user);
+
+    // 1. Отображаем информацию о профиле
     document.getElementById("userInfo").innerHTML = `
-      <h2>${user.username}</h2>
-      <p>Email: ${user.email}</p>
-      <p>Роль: ${user.role}</p>
-      <p>Дата регистрации: ${new Date(user.createdAt).toLocaleDateString()}</p>
+      <h2 style="color: white; margin-top:0;">${user.username || 'Пользователь'}</h2>
+      <p><strong>Email:</strong><br>${user.email || '—'}</p>
+      <p><strong>Роль:</strong><br>${user.role || 'user'}</p>
+      <p><strong>В системе с:</strong><br>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</p>
+      <button class="logout-btn" id="logoutBtn">Выйти из аккаунта</button>
     `;
 
-    // Загружаем библиотеку
+    // 2. Отображаем библиотеку
     const libraryContainer = document.getElementById("library");
+    
     if (!user.library || user.library.length === 0) {
-      libraryContainer.innerHTML = "<p>Ваша библиотека пуста</p>";
-      return;
+      libraryContainer.innerHTML = "<p style='color: #acb2b8;'>В вашей библиотеке пока нет игр.</p>";
+    } else {
+      libraryContainer.innerHTML = user.library.map(item => `
+        <div class="game-card" style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+          <div style="flex-grow: 1;">
+            <h3 style="margin: 0 0 5px 0;">${item.gameId?.title || 'Неизвестная игра'}</h3>
+            <div style="font-size: 0.8rem; color: #66c0f4;">
+              Куплено: ${new Date(item.purchaseDate).toLocaleDateString()} | 
+              Сыграно: ${item.hoursPlayed} ч.
+            </div>
+          </div>
+        </div>
+      `).join("");
     }
 
-    libraryContainer.innerHTML = "";
-    user.library.forEach(item => {
-      const date = new Date(item.purchaseDate).toLocaleDateString();
-      libraryContainer.innerHTML += `
-        <div class="game-card">
-          <h3>${item.gameId.title}</h3>
-          <p>Цена: $${item.gameId.price}</p>
-          <p>Дата покупки: ${date}</p>
-          <p>Часы игры: ${item.hoursPlayed}</p>
-        </div>
-      `;
-    });
+    // Слушатель для кнопки выхода
+    document.getElementById("logoutBtn").onclick = () => {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    };
 
   } catch (err) {
-    console.error("Ошибка при загрузке данных пользователя:", err);
+    console.error("Ошибка:", err);
+    document.getElementById("userInfo").innerHTML = "<p>Ошибка загрузки профиля.</p>";
   }
 }
 
-loadUser();
+loadProfile();
 </script>
 
 </body>
